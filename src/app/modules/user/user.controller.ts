@@ -27,7 +27,7 @@ const signupVerification = catchAsync(async (req, res) => {
 
 //get users
 const getUsers = catchAsync(async (req: Request, res: Response) => {
-  const users = await userService.getUsers();
+  const users = await userService.getUsersIntoDB();
   sendResponse(res, {
     success: true,
     statusCode: 200,
@@ -49,10 +49,7 @@ const getSingleUser = catchAsync(async (req: Request, res: Response) => {
 
 //update user
 const updateUser = catchAsync(async (req: Request, res: Response) => {
-  const updatedUser = await userService.updateUser(
-    req.params.id,
-    req.body
-  );
+  const updatedUser = await userService.updateUser(req.params.id, req.body);
   sendResponse(res, {
     success: true,
     statusCode: 200,
