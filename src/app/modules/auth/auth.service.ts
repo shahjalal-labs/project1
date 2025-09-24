@@ -1,3 +1,4 @@
+// prisma chatgpt reference: https://chatgpt.com/share/68ce35fd-296c-800c-98ee-55228af26de8
 import prisma from "../../../shared/prisma";
 import bcrypt from "bcryptjs";
 import ApiError from "../../../errors/ApiErrors";
@@ -27,7 +28,7 @@ const loginUserIntoDB = async (payload: {
 
   const isPasswordValid = await bcrypt.compare(
     payload.password,
-    user?.password
+    user?.password,
   );
 
   if (!isPasswordValid) {
@@ -46,7 +47,7 @@ const loginUserIntoDB = async (payload: {
   const accessToken = jwtHelpers.generateToken(
     { id: user.id, email: user.email, role: user.role },
     config.jwt.jwt_secret as string,
-    config.jwt.expires_in as string
+    config.jwt.expires_in as string,
   );
 
   return {
@@ -55,7 +56,7 @@ const loginUserIntoDB = async (payload: {
 };
 
 //google login
-const googleLogin = async (payload: {
+/* const googleLogin = async (payload: {
   email: string;
   fullName: string;
   fcmToken: string;
@@ -70,7 +71,7 @@ const googleLogin = async (payload: {
     const accessToken = jwtHelpers.generateToken(
       { id: user.id, email: user.email, role: user.role },
       config.jwt.jwt_secret as string,
-      config.jwt.expires_in as string
+      config.jwt.expires_in as string,
     );
     return {
       accessToken,
@@ -80,7 +81,7 @@ const googleLogin = async (payload: {
   const newUser = await prisma.user.create({
     data: {
       email: payload.email,
-      fullName: payload.fullName,
+      // firstName: payload,
       password: "",
       fcmToken: payload.fcmToken,
     },
@@ -89,18 +90,18 @@ const googleLogin = async (payload: {
   const accessToken = jwtHelpers.generateToken(
     { id: newUser.id, email: newUser.email, role: newUser.role },
     config.jwt.jwt_secret as string,
-    config.jwt.expires_in as string
+    config.jwt.expires_in as string,
   );
 
   return {
     accessToken,
   };
-};
+}; */
 
 // update or add user location in Redis using GEO
 const userLocationUpdateInRedis = async (
   userId: string,
-  userLocation: { longitude: number; latitude: number }
+  userLocation: { longitude: number; latitude: number },
 ) => {
   const redisGeoKey = "userLocations"; // you can keep all users under one key
 
@@ -130,7 +131,7 @@ const sendForgotPasswordOtpDB = async (email: string) => {
   const html = `
      <div style="font-family: Arial, sans-serif; color: #333;">
        <h2>Password Reset Request</h2>
-       <p>Hi <b>${existringUser.fullName}</b>,</p>
+       <p>Hi <b>${existringUser.firstName + " " + existringUser.lastName}</b>,</p>
        <p>Your OTP for password reset is:</p>
        <h1 style="color: #007BFF;">${otp}</h1>
        <p>This OTP is valid for <b>5 minutes</b>. If you did not request this, please ignore this email.</p>
@@ -172,7 +173,7 @@ const verifyForgotPasswordOtpCodeDB = async (payload: {
   const forgetToken = jwtHelpers.generateToken(
     { id: userId, email },
     config.jwt.jwt_secret as string,
-    config.jwt.expires_in as string
+    config.jwt.expires_in as string,
   );
 
   return { forgetToken };
@@ -187,7 +188,7 @@ const resetForgotPasswordDB = async (newPassword: string, userId: string) => {
   const email = existingUser.email as string;
   const hashedPassword = await bcrypt.hash(
     newPassword,
-    Number(config.jwt.gen_salt)
+    Number(config.jwt.gen_salt),
   );
 
   await prisma.user.update({
@@ -205,12 +206,6 @@ const resetForgotPasswordDB = async (newPassword: string, userId: string) => {
 const myProfile = async (userId: string) => {
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    select: {
-      id: true,
-      fullName: true,
-      profileImage: true,
-      email: true,
-    },
   });
   if (!user) {
     throw new ApiError(404, "user not found!");
@@ -223,9 +218,8 @@ const myProfile = async (userId: string) => {
 const updateProfileIntoDB = async (
   userId: string,
   userData: User,
-  file: Express.Multer.File
+  file: Express.Multer.File,
 ) => {
-  console.log("file:", file, "data:", userData);
   const user = await prisma.user.findUnique({ where: { id: userId } });
   if (!user) {
     throw new ApiError(404, "user not found for edit user");
@@ -247,7 +241,7 @@ const updateProfileIntoDB = async (
 
 export const authService = {
   loginUserIntoDB,
-  googleLogin,
+  // googleLogin,
   myProfile,
   updateProfileIntoDB,
   userLocationUpdateInRedis,

@@ -36,9 +36,13 @@ const updateProfileSchema = z.object({
     .optional(),
 });
 
+const sendForgotPasswordOtpValidationSchema = z.object({
+  email: z.string().email("Invalid email address"),
+});
 export const authValidation = {
   updateProfileSchema,
   authLoginSchema,
   googleLoginSchema,
   locationUpdateSchema,
+  sendForgotPasswordOtpValidationSchema,
 };

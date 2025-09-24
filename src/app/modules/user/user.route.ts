@@ -7,24 +7,42 @@ import auth from "../../middlewares/auth";
 
 const router = express.Router();
 
+// create user with otp email verification
 router.post(
   "/create",
   validateRequest(userValidation.userRegisterValidationSchema),
-  UserControllers.createUser
+  UserControllers.createUser,
+);
+
+// create user without otp email verification
+router.post(
+  "/create-user",
+  validateRequest(userValidation.userCreateValidationSchema),
+  UserControllers.CreateUser,
 );
 router.post(
   "/signup-verification",
   validateRequest(userValidation.verificationSchema),
-  UserControllers.signupVerification
+  UserControllers.signupVerification,
 );
-router.get("/", auth(UserRole.Admin), UserControllers.getUsers);
+
+// router.get("/", auth(UserRole.Admin), UserControllers.getUsers);
+router.get("/", auth(), UserControllers.getUsers);
 router.get("/:id", auth(), UserControllers.getSingleUser);
-router.put(
-  "/:id",
+// update role and user status (active, block, deleted)
+router.patch(
+  "/admin-update",
   validateRequest(userValidation.userUpdateValidationSchema),
   auth(UserRole.Admin),
-  UserControllers.updateUser
+  UserControllers.updateUser,
+);
+
+router.patch(
+  "/:id",
+  validateRequest(userValidation.userUpdateValidationSchema),
+  // auth(UserRole.Admin),
+  UserControllers.updateUser,
 );
 router.delete("/:id", auth(UserRole.Admin), UserControllers.deleteUser);
-
+// Route
 export const userRoutes = router;

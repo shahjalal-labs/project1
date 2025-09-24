@@ -16,7 +16,7 @@ const loginUser = catchAsync(async (req, res) => {
 });
 
 //google login
-const googleLogin = catchAsync(async (req, res) => {
+/* const googleLogin = catchAsync(async (req, res) => {
   const result = await authService.googleLogin(req.body);
 
   sendResponse(res, {
@@ -25,7 +25,7 @@ const googleLogin = catchAsync(async (req, res) => {
     message: "Google login has been successfull",
     data: result,
   });
-});
+}); */
 
 //update user location
 const userLocationUpdateInRedis = catchAsync(async (req, res) => {
@@ -50,7 +50,7 @@ const sendForgotPasswordOtp = catchAsync(
       message: "OTP send successfully",
       data: response,
     });
-  }
+  },
 );
 
 // verify forgot password otp code
@@ -65,7 +65,7 @@ const verifyForgotPasswordOtpCode = catchAsync(
       message: "OTP verified successfully.",
       data: response,
     });
-  }
+  },
 );
 
 // update forgot password
@@ -110,7 +110,7 @@ const updateProfile = catchAsync(async (req, res) => {
 
 export const authController = {
   loginUser,
-  googleLogin,
+  // googleLogin,
   myProfile,
   updateProfile,
   userLocationUpdateInRedis,

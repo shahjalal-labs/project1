@@ -6,8 +6,50 @@ import prisma from "../../../shared/prisma";
 import generateOTP from "../../../helpers/generateOtp";
 import sendEmail from "../../../helpers/sendEmail";
 import redisClient from "../../../helpers/redis";
+import { jwtHelpers } from "../../../helpers/jwtHelpers";
+import config from "../../../config";
+//p: AUTH SERVICE INTERPRET WITH CHATGPT: https://chatgpt.com/share/68ce4ed1-9374-800c-8299-01a5d9b0dec8
+//
+// create new user without otp verification
+const createUserIntoDB = async (payload: User) => {
+  const existingUser = await prisma.user.findFirst({
+    where: { email: payload.email },
+  });
 
-//create new user
+  if (existingUser) {
+    throw new ApiError(409, "email already exist!");
+  }
+
+  const hashedPassword = await bcrypt.hash(payload.password as string, 10);
+
+  const user = await prisma.user.create({
+    data: {
+      ...payload,
+
+      password: hashedPassword,
+
+      // stripeCustomerId: stripeAccount.id,
+    },
+  });
+
+  const accessToken = jwtHelpers.generateToken(
+    { id: user.id, email: user.email, role: user.role },
+
+    config.jwt.jwt_secret as string,
+
+    config.jwt.expires_in as string,
+  );
+
+  const { password, ...sanitizedUser } = user;
+
+  return {
+    accessToken,
+
+    user: sanitizedUser,
+  };
+};
+//
+//create new user with otp verification
 const createUser = async (payload: User) => {
   const existingUser = await prisma.user.findFirst({
     where: { email: payload.email },
@@ -20,9 +62,12 @@ const createUser = async (payload: User) => {
 
   // Prepare pending user object
   const pendingUserData = {
+    firstName: payload.firstName,
+    lastName: payload.lastName,
     email: payload.email,
-    fullName: payload.fullName,
     password: hashedPassword,
+    nationality: payload.nationality,
+    fcmToken: payload.fcmToken,
   };
 
   // Save pending user in Redis (store as JSON string)
@@ -38,7 +83,7 @@ const createUser = async (payload: User) => {
   const html = `
     <div style="font-family: Arial, sans-serif; color: #333;">
       <h2>Password Reset Request</h2>
-      <p>Hi <b>${payload.fullName}</b>,</p>
+      <p>Hi <b>${payload.firstName + " " + payload.lastName}</b>,</p>
       <p>Your OTP for password reset is:</p>
       <h1 style="color: #007BFF;">${otp}</h1>
       <p>This OTP is valid for <b>5 minutes</b>. If you did not request this, please ignore this email.</p>
@@ -76,11 +121,7 @@ const signupVerification = async (payload: { email: string; otp: string }) => {
   // 4️⃣ Create new user inside DB transaction
   await prisma.$transaction(async (tx) => {
     const createdUser = await tx.user.create({
-      data: {
-        email: pendingUser.email,
-        fullName: pendingUser.fullName,
-        password: pendingUser.password,
-      },
+      data: pendingUser,
     });
 
     return createdUser;
@@ -107,7 +148,7 @@ const getSingleUser = async (id: string) => {
 };
 
 //get all users
-const getUsersIntoDB = async () => {
+const getUsers = async () => {
   const users = await prisma.user.findMany();
   if (users.length === 0) {
     throw new ApiError(404, "Users not found!");
@@ -121,6 +162,9 @@ const getUsersIntoDB = async () => {
 
 //update user
 const updateUser = async (id: string, userData: any) => {
+  if (userData?.role || userData?.status) {
+    throw new ApiError(403, "You can't update role and status");
+  }
   if (!ObjectId.isValid(id)) {
     throw new ApiError(400, "Invalid user ID format");
   }
@@ -159,8 +203,9 @@ const deleteUser = async (userId: string, loggedId: string) => {
 
 export const userService = {
   createUser,
+  createUserIntoDB,
   signupVerification,
-  getUsersIntoDB,
+  getUsers,
   getSingleUser,
   updateUser,
   deleteUser,
