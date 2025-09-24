@@ -10,7 +10,6 @@ Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4YzkzY2M3MzVkNDAz
 
 # ========== GET All Users  (END)   ==========
 
-GET http://localhost:5002/api/v1/users/ruhulaminvai/amin
 
 # (START) ==========  CREATE USER WITH OTP EMAIL VERIFICATION (START) ==========
 

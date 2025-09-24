@@ -1,4 +1,4 @@
-GET {{baseUrl}}/products
+GET {{baseUrl}}/pets
 
 GET {{baseUrl}}/products/usersproduct/68ca50ed1768bf9be41c45db
 GET {{baseUrl}}/products/usersproduct/68ca50e21768bf9be41c45da
@@ -12,6 +12,7 @@ Content-Type: application/json
   "petAge": 3,
   "userId": "651f0c5a9b3e2d47a4a2c8b1"
 }
+
 
 
 POST {{baseUrl}}/products
