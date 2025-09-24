@@ -10,7 +10,8 @@ Content-Type: application/json
   "petName": "Whiskers",
   "petType": "Cat",
   "petAge": 3,
-  "userId": "651f0c5a9b3e2d47a4a2c8b1"
+  "userId": "68d277c7895b8b7fcc30399e",
+  "weight":2
 }
 
 

@@ -18,7 +18,7 @@ const createPetIntoDB = async (payload: Pet) => {
   return result;
 };
 
-const getAllPetsFromDB = async (payload: Pet) => {
+const getAllPetsFromDB = async () => {
   const result = await prisma.pet.findMany();
   if (!result) {
     throw new ApiError(404, "User not found");

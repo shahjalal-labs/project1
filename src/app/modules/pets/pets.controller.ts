@@ -13,6 +13,17 @@ const createPet = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const getPet = catchAsync(async (req: Request, res: Response) => {
+  const result = await PetService.getAllPetsFromDB();
+  sendResponse(res, {
+    success: true,
+    statusCode: 200,
+    message: "Pets retrieved successfully",
+    data: result,
+  });
+});
+
 export const PetController = {
   createPet,
+  getPet,
 };
